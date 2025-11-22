@@ -40,25 +40,37 @@ def fix_log_file_ownerships(log_path, user, group):
         set_file_ownership(log_file, user, group)
 
 # Logging Configuration
+def fix_log_file_ownerships(log_path, user, group):
+    """Ensure ownership of all log files."""
+    log_files = glob.glob(f"{log_path}*")
+    for log_file in log_files:
+        set_file_ownership(log_file, user, group)
+
+# Logging Configuration
 LOG_HANDLER = RotatingFileHandler(
     filename=LOG_PATH,
     maxBytes=4 * 1024 * 1024,  # 4 MB per log file
     backupCount=7  # Keep up to 7 backup log files
 )
-LOG_HANDLER.namer = lambda name: f"{name}"
+
+# Custom namer to change led_brightness.log.1 -> led_brightness.1.log
+def custom_namer(source):
+    import os
+    base, ext = os.path.splitext(source)  # e.g., ('led_brightness.log', '.1')
+    if base.endswith('.log'):
+        base = base[:-4]  # Remove original '.log'
+    number = ext.lstrip('.')  # Get the rotation number
+    if number:
+        return f"{base}.{number}.log"
+    return f"{base}.log"
+
+LOG_HANDLER.namer = custom_namer
+
 LOG_HANDLER.rotator = lambda source, dest: (
     os.rename(source, dest),
     fix_log_file_ownerships(LOG_PATH, 'pi', 'pi')
 )
 
-logging.basicConfig(
-    handlers=[LOG_HANDLER],
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-
-# Initial log file ownership setup
-fix_log_file_ownerships(LOG_PATH, 'pi', 'pi')
 
 class LEDController:
     """Encapsulates LED operations."""
