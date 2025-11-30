@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+.idea/
+>>>>>>> origin/main
 *.hex
 *.elf
 *.bin
@@ -5,3 +9,11 @@
 *.pyc
 *.swp
 *.csv
+<<<<<<< HEAD
+=======
+.DS_Store
+build/
+.venv
+.vs/
+>>>>>>> origin/main
+.vs/
